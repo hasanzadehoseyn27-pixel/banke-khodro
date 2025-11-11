@@ -4,223 +4,319 @@
     <meta charset="UTF-8" />
     <title>فرم آگهی خودرو</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
     <!-- Tailwind (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = {
-        theme: { extend: { fontFamily: { sans: ['Vazirmatn', 'ui-sans-serif'] } } },
-        corePlugins: { preflight: true }
-      }
+        tailwind.config = {
+            theme: { extend: { fontFamily: { sans: ['Vazirmatn', 'ui-sans-serif'] } } },
+            corePlugins: { preflight: true }
+        }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
+
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- React UMD + Babel (برای JSX در مرورگر) -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body class="bg-slate-100 font-sans">
     <div id="root"></div>
 
-    <script type="module">
-      import React, {useMemo, useRef, useState} from "https://esm.sh/react@18.2.0";
-      import { createRoot } from "https://esm.sh/react-dom/client@18.2.0";
+    <script type="text/babel">
+    const { useMemo, useRef, useState } = React;
+    const tg = window.Telegram?.WebApp;
+    tg?.expand();
 
-      const tg = window.Telegram?.WebApp;
-      tg?.expand();
+    // اگر بعداً تونل عمومی داشتید، این را به دامنهٔ پابلیک بک‌اند تغییر دهید:
+    const API_SUBMIT = "/api/ads/submit";
 
-      const Sep = "━━━━━━━━━━━━━━━━";
+    const Sep = "━━━━━━━━━━━━━━━━";
 
-      function Field({label, children}) {
-        return (
-          <div class="mb-4">
-            <label class="block mb-1 text-sm font-semibold text-slate-700">{label}</label>
-            {children}
-          </div>
-        );
-      }
+    function Field({ label, children }) {
+      return (
+        <div className="mb-4">
+          <label className="block mb-1 text-sm font-semibold text-slate-700">{label}</label>
+          {children}
+        </div>
+      );
+    }
 
-      function Preview({v}) {
-        return (
-          <div class="bg-white shadow rounded-2xl p-4 text-sm whitespace-pre-wrap leading-7">
-            <div>درخواست انتشار آگهی 📬</div>
-            <div>👤 کاربر: {v.submitter || "—"}</div>
-            <div class="text-slate-300">{Sep}</div>
-            <div>🧾 نوع درخواست: {v.requestTypeLabel}</div>
-            <div class="text-slate-300">{Sep}</div>
-            <div>🚘 نام خودرو: {v.carName || "—"}</div>
-            <div class="text-slate-300">{Sep}</div>
-            <div>🗓️ سال ساخت: {v.year || "—"}</div>
-            <div class="text-slate-300">{Sep}</div>
-            <div>🎨 رنگ: {v.color || "—"}</div>
-            <div class="text-slate-300">{Sep}</div>
-            <div>⏱️ کارکرد: {v.mileage || "—"}</div>
-            <div class="text-slate-300">{Sep}</div>
-            <div>🛡️ وضعیت بدنه: {v.body || "—"}</div>
-            <div class="text-slate-300">{Sep}</div>
-            <div>🧱 وضعیت شاسی‌ها: {v.chassis || "—"}</div>
-            <div class="text-slate-300">{Sep}</div>
-            <div>🔧 وضعیت موتور و فنی: {v.mechanical || "—"}</div>
-            <div class="text-slate-300">{Sep}</div>
-            <div>⚙️ نوع گیربکس: {v.gearbox || "—"}</div>
-            <div class="text-slate-300">{Sep}</div>
-            <div>🔒 قیمت (فقط ادمین): {v.price || "—"}</div>
-            <div class="text-slate-300">{Sep}</div>
-            <div>🔒 سایر توضیحات (فقط ادمین):</div>
-            <div>{v.extra || "—"}</div>
-          </div>
-        )
-      }
+    function Preview({ v }) {
+      return (
+        <div className="bg-white shadow rounded-2xl p-4 text-sm whitespace-pre-wrap leading-7">
+          <div>درخواست انتشار آگهی 📬</div>
+          <div>👤 کاربر: {v.submitter || "—"}</div>
+          <div className="text-slate-300">{Sep}</div>
+          <div>🧾 نوع درخواست: {v.requestTypeLabel}</div>
+          <div className="text-slate-300">{Sep}</div>
+          <div>🚘 نام خودرو: {v.carName || "—"}</div>
+          <div className="text-slate-300">{Sep}</div>
+          <div>🗓️ سال ساخت: {v.year || "—"}</div>
+          <div className="text-slate-300">{Sep}</div>
+          <div>🎨 رنگ: {v.color || "—"}</div>
+          <div className="text-slate-300">{Sep}</div>
+          <div>⏱️ کارکرد: {v.mileage || "—"}</div>
+          <div className="text-slate-300">{Sep}</div>
+          <div>🛡️ وضعیت بدنه: {v.body || "—"}</div>
+          <div className="text-slate-300">{Sep}</div>
+          <div>🧱 وضعیت شاسی‌ها: {v.chassis || "—"}</div>
+          <div className="text-slate-300">{Sep}</div>
+          <div>🔧 وضعیت موتور و فنی: {v.mechanical || "—"}</div>
+          <div className="text-slate-300">{Sep}</div>
+          <div>⚙️ نوع گیربکس: {v.gearbox || "—"}</div>
+          <div className="text-slate-300">{Sep}</div>
+          <div>🛞 وضعیت لاستیک‌ها: {v.tires || "—"}</div>
+          <div className="text-slate-300">{Sep}</div>
+          <div>🔒 قیمت (فقط ادمین): {v.price || "—"}</div>
+          <div className="text-slate-300">{Sep}</div>
+          <div>🔒 سایر توضیحات (فقط ادمین):</div>
+          <div>{v.extra || "—"}</div>
+        </div>
+      );
+    }
 
-      function App() {
-        const [photos, setPhotos] = useState([]);
-        const [loading, setLoading] = useState(false);
-        const fileRef = useRef(null);
+    function App() {
+      const [photos, setPhotos] = useState([]);
+      const [loading, setLoading] = useState(false);
+      const fileRef = useRef(null);
 
-        const [v, setV] = useState({
-          requestType: "Sell",
-          carName: "", year: "", color: "", mileage: "",
-          body: "", chassis: "", mechanical: "", gearbox: "",
-          price: "", extra: ""
-        });
+      const [v, setV] = useState({
+        requestType: "Sell",
+        carName: "",
+        year: "",
+        color: "",
+        mileage: "",
+        body: "",
+        chassis: "",
+        mechanical: "",
+        gearbox: "",
+        tires: "",          // ← وضعیت لاستیک‌ها
+        price: "",
+        extra: ""
+      });
 
-        const submitter = useMemo(() => {
-          const u = tg?.initDataUnsafe?.user;
-          if (!u) return "";
-          if (u.username) return "@"+u.username;
-          return [u.first_name, u.last_name].filter(Boolean).join(" ");
-        }, []);
+      const submitter = useMemo(() => {
+        const u = tg?.initDataUnsafe?.user;
+        if (!u) return "";
+        if (u.username) return "@" + u.username;
+        return [u.first_name, u.last_name].filter(Boolean).join(" ");
+      }, []);
 
-        const requestTypeLabel = {Buy:"خرید", Sell:"فروش", CoSell:"فروش همکاری"}[v.requestType];
+      const requestTypeLabel = { Buy: "خرید", Sell: "فروش", CoSell: "فروش همکاری" }[v.requestType];
 
-        const onPick = (e) => {
-          const files = Array.from(e.target.files || []);
-          setPhotos(p => [...p, ...files]);
-        };
+      const onPick = (e) => {
+        const files = Array.from(e.target.files || []);
+        setPhotos((p) => [...p, ...files]);
+      };
 
-        const removePhoto = (idx) => setPhotos(p => p.filter((_,i)=>i!==idx));
+      const removePhoto = (idx) => setPhotos((p) => p.filter((_, i) => i !== idx));
 
-        const onSubmit = async () => {
-          if (!v.carName || !v.year) {
-            alert("نام خودرو و سال ساخت الزامی است.");
-            return;
-          }
-          setLoading(true);
-          try {
-            const fd = new FormData();
-            fd.append("tgInitData", tg?.initData || "");
-            fd.append("requestType", v.requestType);
-            fd.append("carName", v.carName);
-            fd.append("year", v.year);
-            fd.append("color", v.color);
-            fd.append("mileage", v.mileage);
-            fd.append("body", v.body);
-            fd.append("chassis", v.chassis);
-            fd.append("mechanical", v.mechanical);
-            fd.append("gearbox", v.gearbox);
-            fd.append("price", v.price);
-            fd.append("extra", v.extra);
-            photos.forEach((f,i)=> fd.append("photo"+i, f, f.name));
+      const onSubmit = async () => {
+        if (!v.carName || !v.year) {
+          alert("نام خودرو و سال ساخت الزامی است.");
+          return;
+        }
+        setLoading(true);
+        try {
+          const fd = new FormData();
+          fd.append("tgInitData", tg?.initData || "");
+          fd.append("requestType", v.requestType);
+          fd.append("carName", v.carName);
+          fd.append("year", v.year);
+          fd.append("color", v.color);
+          fd.append("mileage", v.mileage);
+          fd.append("body", v.body);
+          fd.append("chassis", v.chassis);
+          fd.append("mechanical", v.mechanical);
+          fd.append("gearbox", v.gearbox);
+          fd.append("tires", v.tires);     // ← ارسال به بک‌اند (اگر فیلد جدید را اضافه کردید)
+          fd.append("price", v.price);
+          fd.append("extra", v.extra);
 
-            const res = await fetch("/api/ads/submit", { method:"POST", body: fd });
-            if (!res.ok) throw new Error(await res.text());
-            alert("ثبت شد و برای ادمین ارسال گردید.");
-            tg?.close();
-          } catch (e) {
-            alert("خطا: " + e.message);
-          } finally {
-            setLoading(false);
-          }
-        };
+          photos.forEach((f, i) => fd.append("photo" + i, f, f.name));
 
-        return (
-          <div class="max-w-5xl mx-auto p-4">
-            <header class="sticky top-0 z-10 bg-slate-100/70 backdrop-blur mb-4">
-              <h1 class="text-xl font-extrabold">فرم آگهی خودرو</h1>
-              <p class="text-slate-500 text-sm">کاربر: {submitter || "—"}</p>
-            </header>
+          const res = await fetch(API_SUBMIT, { method: "POST", body: fd });
+          if (!res.ok) throw new Error(await res.text());
+          alert("ثبت شد و برای ادمین ارسال گردید.");
+          tg?.close();
+        } catch (e) {
+          alert("خطا: " + (e?.message || e));
+        } finally {
+          setLoading(false);
+        }
+      };
 
-            <div class="grid lg:grid-cols-2 gap-4">
-              <div class="bg-white shadow rounded-2xl p-4">
-                <Field label="نوع درخواست">
-                  <div class="flex gap-2">
-                    {["Buy","Sell","CoSell"].map(rt=>(
-                      <button type="button" onClick={()=>setV({...v, requestType: rt})}
-                        class={"px-3 py-1 rounded-full border " + (v.requestType===rt?"bg-indigo-600 text-white border-indigo-600":"border-slate-300")}>
-                        {{Buy:"خرید",Sell:"فروش",CoSell:"فروش همکاری"}[rt]}
-                      </button>
-                    ))}
-                  </div>
-                </Field>
+      return (
+        <div className="max-w-5xl mx-auto p-4">
+          <header className="sticky top-0 z-10 bg-slate-100/70 backdrop-blur mb-4">
+            <h1 className="text-xl font-extrabold">فرم آگهی خودرو</h1>
+            <p className="text-slate-500 text-sm">کاربر: {submitter || "—"}</p>
+          </header>
 
-                <Field label="نام خودرو">
-                  <input class="w-full rounded-lg border-slate-300" value={v.carName} onInput={e=>setV({...v, carName:e.target.value})}/>
-                </Field>
-
-                <div class="grid grid-cols-2 gap-3">
-                  <Field label="سال ساخت">
-                    <input inputmode="numeric" class="w-full rounded-lg border-slate-300" value={v.year} onInput={e=>setV({...v, year:e.target.value})}/>
-                  </Field>
-                  <Field label="رنگ">
-                    <input class="w-full rounded-lg border-slate-300" value={v.color} onInput={e=>setV({...v, color:e.target.value})}/>
-                  </Field>
+          <div className="grid lg:grid-cols-2 gap-4">
+            <div className="bg-white shadow rounded-2xl p-4">
+              <Field label="نوع درخواست">
+                <div className="flex gap-2">
+                  {["Buy", "Sell", "CoSell"].map((rt) => (
+                    <button
+                      key={rt}
+                      type="button"
+                      onClick={() => setV({ ...v, requestType: rt })}
+                      className={
+                        "px-3 py-1 rounded-full border " +
+                        (v.requestType === rt
+                          ? "bg-indigo-600 text-white border-indigo-600"
+                          : "border-slate-300")
+                      }
+                    >
+                      {{ Buy: "خرید", Sell: "فروش", CoSell: "فروش همکاری" }[rt]}
+                    </button>
+                  ))}
                 </div>
+              </Field>
 
-                <div class="grid grid-cols-2 gap-3">
-                  <Field label="کارکرد">
-                    <input class="w-full rounded-lg border-slate-300" value={v.mileage} onInput={e=>setV({...v, mileage:e.target.value})}/>
-                  </Field>
-                  <Field label="نوع گیربکس">
-                    <input class="w-full rounded-lg border-slate-300" value={v.gearbox} onInput={e=>setV({...v, gearbox:e.target.value})}/>
-                  </Field>
-                </div>
+              <Field label="نام خودرو">
+                <input
+                  className="w-full rounded-lg border-slate-300"
+                  value={v.carName}
+                  onChange={(e) => setV({ ...v, carName: e.target.value })}
+                />
+              </Field>
 
-                <Field label="وضعیت بدنه">
-                  <input class="w-full rounded-lg border-slate-300" value={v.body} onInput={e=>setV({...v, body:e.target.value})}/>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="سال ساخت">
+                  <input
+                    inputMode="numeric"
+                    className="w-full rounded-lg border-slate-300"
+                    value={v.year}
+                    onChange={(e) => setV({ ...v, year: e.target.value })}
+                  />
                 </Field>
-                <Field label="وضعیت شاسی‌ها">
-                  <input class="w-full rounded-lg border-slate-300" value={v.chassis} onInput={e=>setV({...v, chassis:e.target.value})}/>
+                <Field label="رنگ">
+                  <input
+                    className="w-full rounded-lg border-slate-300"
+                    value={v.color}
+                    onChange={(e) => setV({ ...v, color: e.target.value })}
+                  />
                 </Field>
-                <Field label="وضعیت موتور و فنی">
-                  <input class="w-full rounded-lg border-slate-300" value={v.mechanical} onInput={e=>setV({...v, mechanical:e.target.value})}/>
-                </Field>
-
-                <Field label="عکس‌ها (فقط برای ادمین)">
-                  <input type="file" ref={fileRef} multiple accept="image/*" class="hidden" onChange={onPick}/>
-                  <div class="flex flex-wrap gap-2">
-                    <button class="px-3 py-1 rounded-lg border border-slate-300" type="button" onClick={()=>fileRef.current?.click()}>افزودن عکس</button>
-                    {photos.map((f,i)=>(
-                      <div class="relative">
-                        <img class="w-24 h-24 object-cover rounded-lg border" src={URL.createObjectURL(f)} />
-                        <button type="button" class="absolute -top-2 -left-2 bg-red-500 text-white rounded-full w-6 h-6"
-                          onClick={()=>removePhoto(i)}>×</button>
-                      </div>
-                    ))}
-                  </div>
-                </Field>
-
-                <div class="grid grid-cols-2 gap-3">
-                  <Field label="قیمت (فقط ادمین)">
-                    <input inputmode="numeric" class="w-full rounded-lg border-slate-300" value={v.price} onInput={e=>setV({...v, price:e.target.value})}/>
-                  </Field>
-                </div>
-
-                <Field label="سایر توضیحات (فقط ادمین)">
-                  <textarea rows="4" class="w-full rounded-lg border-slate-300" value={v.extra} onInput={e=>setV({...v, extra:e.target.value})}></textarea>
-                </Field>
-
-                <div class="flex justify-end">
-                  <button disabled={loading} onClick={onSubmit}
-                    class={"px-5 py-2 rounded-xl text-white " + (loading?"bg-slate-400":"bg-emerald-600 hover:bg-emerald-700")}>
-                    {loading ? "در حال ارسال..." : "ارسال برای ادمین"}
-                  </button>
-                </div>
               </div>
 
-              <Preview v={{...v, submitter: submitter, requestTypeLabel: requestTypeLabel}} />
-            </div>
-          </div>
-        );
-      }
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="کارکرد">
+                  <input
+                    className="w-full rounded-lg border-slate-300"
+                    value={v.mileage}
+                    onChange={(e) => setV({ ...v, mileage: e.target.value })}
+                  />
+                </Field>
+                <Field label="نوع گیربکس">
+                  <input
+                    className="w-full rounded-lg border-slate-300"
+                    value={v.gearbox}
+                    onChange={(e) => setV({ ...v, gearbox: e.target.value })}
+                  />
+                </Field>
+              </div>
 
-      createRoot(document.getElementById("root")).render(<App/>);
+              <Field label="وضعیت بدنه">
+                <input
+                  className="w-full rounded-lg border-slate-300"
+                  value={v.body}
+                  onChange={(e) => setV({ ...v, body: e.target.value })}
+                />
+              </Field>
+              <Field label="وضعیت شاسی‌ها">
+                <input
+                  className="w-full rounded-lg border-slate-300"
+                  value={v.chassis}
+                  onChange={(e) => setV({ ...v, chassis: e.target.value })}
+                />
+              </Field>
+              <Field label="وضعیت موتور و فنی">
+                <input
+                  className="w-full rounded-lg border-slate-300"
+                  value={v.mechanical}
+                  onChange={(e) => setV({ ...v, mechanical: e.target.value })}
+                />
+              </Field>
+              <Field label="وضعیت لاستیک‌ها">
+                <input
+                  className="w-full rounded-lg border-slate-300"
+                  value={v.tires}
+                  onChange={(e) => setV({ ...v, tires: e.target.value })}
+                />
+              </Field>
+
+              <Field label="عکس‌ها (فقط برای ادمین)">
+                <input type="file" ref={fileRef} multiple accept="image/*" className="hidden" onChange={onPick} />
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    className="px-3 py-1 rounded-lg border border-slate-300"
+                    type="button"
+                    onClick={() => fileRef.current?.click()}
+                  >
+                    افزودن عکس
+                  </button>
+                  {photos.map((f, i) => (
+                    <div key={i} className="relative">
+                      <img className="w-24 h-24 object-cover rounded-lg border" src={URL.createObjectURL(f)} />
+                      <button
+                        type="button"
+                        className="absolute -top-2 -left-2 bg-red-500 text-white rounded-full w-6 h-6"
+                        onClick={() => removePhoto(i)}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </Field>
+
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="قیمت (فقط ادمین)">
+                  <input
+                    inputMode="numeric"
+                    className="w-full rounded-lg border-slate-300"
+                    value={v.price}
+                    onChange={(e) => setV({ ...v, price: e.target.value })}
+                  />
+                </Field>
+              </div>
+
+              <Field label="سایر توضیحات (فقط ادمین)">
+                <textarea
+                  rows="4"
+                  className="w-full rounded-lg border-slate-300"
+                  value={v.extra}
+                  onChange={(e) => setV({ ...v, extra: e.target.value })}
+                ></textarea>
+              </Field>
+
+              <div className="flex justify-end">
+                <button
+                  disabled={loading}
+                  onClick={onSubmit}
+                  className={
+                    "px-5 py-2 rounded-xl text-white " +
+                    (loading ? "bg-slate-400" : "bg-emerald-600 hover:bg-emerald-700")
+                  }
+                >
+                  {loading ? "در حال ارسال..." : "ارسال برای ادمین"}
+                </button>
+              </div>
+            </div>
+
+            <Preview v={{ ...v, submitter: submitter, requestTypeLabel }} />
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
     </script>
 </body>
 </html>
